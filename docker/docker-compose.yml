@@ -1,0 +1,39 @@
+# Docker Compose file Reference (https://docs.docker.com/compose/compose-file/)
+version: '3.7'
+
+services:
+  gobot-production:
+    hostname: gobot-production
+    container_name: gobot-prod
+    restart: unless-stopped
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: base
+    environment:
+      PORT: "8081"
+    volumes:
+      - type: bind
+        source: ../src
+        target: /home/app
+    working_dir: /home/app
+    ports:
+      - "9025:8081"
+    command: bash -c "./scripts/production.sh"
+
+  gobot-development:
+    hostname: gobot-development
+    container_name: gobot-dev
+    restart: unless-stopped
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: dev
+    volumes:
+      - type: bind
+        source: ../src
+        target: /home/app
+    working_dir: /home/app
+    ports:
+      - "9024:8080"
+    command: bash -c "make serve"
