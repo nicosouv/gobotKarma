@@ -28,4 +28,4 @@ That's all.
 Soon.
 
 ## TIL
-You can use tool like ngrok` to test your localhost app òn the web! Check it out: https://ngrok.com/
+You can use tool like `ngrok` to test your localhost app on the web! Check it out: https://ngrok.com/
