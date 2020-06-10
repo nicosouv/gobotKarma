@@ -1,3 +1,5 @@
+[![Go Report Card](https://goreportcard.com/badge/github.com/PoulpePoulpePoulpe/gobotKarma?style=flat-square)](https://goreportcard.com/report/github.com/PoulpePoulpePoulpe/gobotKarma)
+
 # gobotKarma
 
 WIP for a free karma bot for Slack.
