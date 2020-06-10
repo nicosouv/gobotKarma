@@ -1,10 +1,31 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/PoulpePoulpePoulpe/gobotKarma?style=flat-square)](https://goreportcard.com/report/github.com/PoulpePoulpePoulpe/gobotKarma)
 
-# gobotKarma
+# GobotKarma
 
-WIP for a free karma bot for Slack.
+Free karma bot for Slack.
+
 Handle live reloading containers for development. It also contains a production ready container.
 
-More details coming soon. 
+## Before anything 
+You need an `.env` file in `internal` folder.
+Here is an example:
+```
+SLACK_TOKEN=xoxb-12345678912346468774135453
+SLACK_CHANNEL=general
+WEBHOOK=https://hooks.slack.com/services/WHATEVER/TOKEN/YOU/SHOULD/HAVE/HERE
+```
 
-Probably.
+## Docker install for development
+You can just do:
+
+```bash
+whatever$ cd deployments
+deployments$ docker-compose up --build gobot-development
+```
+That's all.
+
+## Docker install for production
+Soon.
+
+## TIL
+You can use tool like ngrok` to test your localhost app òn the web! Check it out: https://ngrok.com/
