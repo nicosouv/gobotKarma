@@ -6,15 +6,21 @@ import (
 	"log"
 	"net/http"
 	"net/url"
-	"os"
 	"encoding/json"
+
+	Lib "./lib"
+
+	slack "github.com/slack-go/slack"
 )
 
-func main() {
+type Success struct {
+	Status int `json:"status"`
+}
 
+func main() {
 	http.HandleFunc("/", commandHandler)
 
-	port := os.Getenv("PORT")
+	port := Lib.Getenv("PORT")
 	if port == "" {
 		port = "8080"
 	}
@@ -25,23 +31,11 @@ func main() {
 	}
 }
 
-type Success struct {
-	Status int `json:"status"`
-}
-
-func getenv(name string) string {
-	v := os.Getenv(name)
-	if v == "" {
-		panic("missing required environment variable " + name)
-	}
-	return v
-}
-
 
 func commandHandler(w http.ResponseWriter, r *http.Request) {
 	data := url.Values{}
-	data.Set("token", getenv("SLACK_TOKEN"))
-	data.Add("channel", getenv("SLACK_CHANNEL"))
+	data.Set("token", Lib.Getenv("SLACK_TOKEN"))
+	data.Add("channel", Lib.Getenv("SLACK_CHANNEL"))
 	data.Add("text", "yo")
 
 	log.Println("sending Message to Slack")
@@ -58,5 +52,15 @@ func commandHandler(w http.ResponseWriter, r *http.Request) {
 
 		w.Header().Add("Content-Type", "application/json")
 		io.WriteString(w, string(jsonized))
+	}
+
+
+	// testing stuff
+	api := slack.New(Lib.Getenv("SLACK_TOKEN"))
+	user, err := api.GetUserInfo("U043WHXCV")
+	if err != nil {
+		log.Println("%s\n", err)
+	} else {
+		log.Println("ID: %s, Fullname: %s, Email: %s\n", user.ID, user.Profile.RealName, user.Profile.Email)
 	}
 }

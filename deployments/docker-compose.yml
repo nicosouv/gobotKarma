@@ -40,4 +40,4 @@ services:
     working_dir: /home/app
     ports:
       - "9024:8080"
-    command: bash -c "make serve"
+    command: bash -c "go mod download && make serve"
