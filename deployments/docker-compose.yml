@@ -7,14 +7,16 @@ services:
     container_name: gobot-prod
     restart: unless-stopped
     build:
-      context: .
+      context: ../build
       dockerfile: Dockerfile
       target: base
     environment:
       PORT: "8081"
+    env_file:
+      - ../internal/.env
     volumes:
       - type: bind
-        source: ../src
+        source: ../
         target: /home/app
     working_dir: /home/app
     ports:
@@ -26,12 +28,14 @@ services:
     container_name: gobot-dev
     restart: unless-stopped
     build:
-      context: .
+      context: ../build
       dockerfile: Dockerfile
       target: dev
+    env_file:
+      - ../internal/.env
     volumes:
       - type: bind
-        source: ../src
+        source: ../
         target: /home/app
     working_dir: /home/app
     ports:

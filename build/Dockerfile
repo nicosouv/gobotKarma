@@ -3,7 +3,7 @@
 FROM golang:1.14-alpine as base
 RUN apk update && apk upgrade && \
     apk add --no-cache bash git openssh
-WORKDIR /home/app/src
+WORKDIR /home/app
 
 # DEV 
 FROM base as dev 
@@ -16,4 +16,4 @@ WORKDIR /root/fswatch-1.14.0
 RUN ./configure
 RUN make 
 RUN make install 
-WORKDIR /home/app/src
+WORKDIR /home/app/cmd
