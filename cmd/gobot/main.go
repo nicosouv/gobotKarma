@@ -9,6 +9,7 @@ import (
 	"github.com/slack-go/slack"
 	"log"
 	"net/http"
+	"sort"
 )
 
 var api = slack.New("SLACK_TOKEN")
@@ -44,6 +45,9 @@ func mergeRequestHandler(w http.ResponseWriter, r *http.Request) {
 
 	var mrs = Git.GrabMRsForAllProjects()
 	messages := []IM.SlackMessage{}
+
+	sort.Slice(mrs, func(p, q int) bool {
+		return mrs[p].ProjectID < mrs[q].ProjectID })
 
 	for _, mr := range mrs {
 		fmt.Print("%v\n", mr)

@@ -25,9 +25,32 @@ type Success struct {
 
 func DisplayGitlabMRs(messages []SlackMessage) {
 	var text strings.Builder
+
+	text.WriteString("┌────────────────┐" + "\n" +
+		                " │          *Merge Requests*         │" + "\n" +
+		                "└────────────────┘" + "\n\n")
+
 	for _, msg := range messages {
-		text.WriteString("*" + msg.Branch + "* - " + msg.Title + " (_" + msg.Author + "_)" +
-			"       :thumbsup: " + strconv.Itoa(msg.Upvote) + " / :thumbsdown: " + strconv.Itoa(msg.Downvote) + "\n")
+		str := "*" + msg.Branch + "* - " + msg.Title + " (_" + msg.Author + "_)" + "\n"
+		str = str + "\n>  `⭡` "
+
+		if msg.Upvote > 0 {
+			str += "*" + strconv.Itoa(msg.Upvote) + "*"
+		} else {
+			str += strconv.Itoa(msg.Upvote)
+		}
+
+		str += " / `⭣` "
+
+		if msg.Downvote > 0 {
+			str += "*" + strconv.Itoa(msg.Downvote) + "*"
+		} else {
+			str += strconv.Itoa(msg.Downvote)
+		}
+
+		str += "\n"
+
+		text.WriteString(str)
 	}
 
 	data := url.Values{}
