@@ -3,7 +3,8 @@ package main
 import (
 	Git "app/cmd/gobot/gitlab"
 	Lib "app/cmd/gobot/lib"
-	Slack "app/cmd/gobot/slack"
+	IM "app/cmd/gobot/slack"
+	"fmt"
 	"github.com/gorilla/mux"
 	"github.com/slack-go/slack"
 	"log"
@@ -36,18 +37,27 @@ func main() {
 }
 
 func commandHandler(w http.ResponseWriter, r *http.Request) {
-	Slack.NoIdea()
+	IM.NoIdea()
 }
 
 func mergeRequestHandler(w http.ResponseWriter, r *http.Request) {
-	log.Printf("MR Handler")
 
-	Git.GrabMRsForAllProjects()
+	var mrs = Git.GrabMRsForAllProjects()
+	messages := []IM.SlackMessage{}
 
-	log.Printf("Done")
-	/*for _, mr := range mrs {
+	for _, mr := range mrs {
 		fmt.Print("%v\n", mr)
-	}*/
+		msg := IM.SlackMessage{
+			Title:    mr.Title,
+			Wip:      mr.WorkInProgress,
+			Branch:   mr.SourceBranch,
+			Upvote:   mr.Upvotes,
+			Downvote: mr.Downvotes,
+			Author:   mr.Author.Name,
+		}
 
-	//Slack.DisplayGitlabMRs("HEY")
+		messages = append(messages, msg)
+	}
+
+	IM.DisplayGitlabMRs(messages)
 }
