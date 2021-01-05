@@ -4,12 +4,13 @@ import (
 	Git "app/cmd/gobot/gitlab"
 	Lib "app/cmd/gobot/lib"
 	IM "app/cmd/gobot/slack"
-	"fmt"
 	"github.com/gorilla/mux"
 	"github.com/slack-go/slack"
+	"github.com/xanzy/go-gitlab"
 	"log"
 	"net/http"
 	"sort"
+	"strings"
 )
 
 var api = slack.New("SLACK_TOKEN")
@@ -22,9 +23,8 @@ type Success struct {
 func main() {
 	router := mux.NewRouter()
 	router.HandleFunc("/merge-requests", mergeRequestHandler).Methods("POST")
-	router.HandleFunc("/merge-requests", mergeRequestHandler).Methods("GET")
-	router.HandleFunc("/", commandHandler).Methods("POST")
-	router.HandleFunc("/", commandHandler).Methods("GET")
+	router.HandleFunc("/merge-requests", commandHandler).Methods("GET")
+	router.HandleFunc("/", commandHandler).Methods("POST", "GET")
 
 	port := Lib.Getenv("PORT")
 	if port == "" {
@@ -42,15 +42,26 @@ func commandHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func mergeRequestHandler(w http.ResponseWriter, r *http.Request) {
+	_ = r.ParseForm()
+	user_opt_text := r.Form.Get("text")
+	opts := strings.Fields(user_opt_text)
 
-	var mrs = Git.GrabMRsForAllProjects()
+	var mrs []*gitlab.MergeRequest
+
+	switch opts[0] {
+		case "user":
+			mrs = Git.GrabMRsForUsername(opts[1])
+			break
+		default:
+			mrs = Git.GrabMRsForAllProjects("opened")
+	}
+
 	messages := []IM.SlackMessage{}
 
 	sort.Slice(mrs, func(p, q int) bool {
 		return mrs[p].ProjectID < mrs[q].ProjectID })
 
 	for _, mr := range mrs {
-		fmt.Print("%v\n", mr)
 		msg := IM.SlackMessage{
 			Title:    mr.Title,
 			Wip:      mr.WorkInProgress,
