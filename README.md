@@ -13,6 +13,7 @@ Here is an example:
 SLACK_TOKEN=xoxb-12345678912346468774135453
 SLACK_CHANNEL=general
 WEBHOOK=https://hooks.slack.com/services/WHATEVER/TOKEN/YOU/SHOULD/HAVE/HERE
+GITLAB_PRIVATE_TOKEN=MyPrIvAtEtOkEn_p
 ```
 
 ## Docker install for development

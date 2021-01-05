@@ -1,24 +1,28 @@
 package main
 
 import (
-	"bytes"
-	"io"
+	Git "app/cmd/gobot/gitlab"
+	Lib "app/cmd/gobot/lib"
+	Slack "app/cmd/gobot/slack"
+	"github.com/gorilla/mux"
+	"github.com/slack-go/slack"
 	"log"
 	"net/http"
-	"net/url"
-	"encoding/json"
-
-	Lib "./lib"
-
-	slack "github.com/slack-go/slack"
 )
+
+var api = slack.New("SLACK_TOKEN")
+
 
 type Success struct {
 	Status int `json:"status"`
 }
 
 func main() {
-	http.HandleFunc("/", commandHandler)
+	router := mux.NewRouter()
+	router.HandleFunc("/merge-requests", mergeRequestHandler).Methods("POST")
+	router.HandleFunc("/merge-requests", mergeRequestHandler).Methods("GET")
+	router.HandleFunc("/", commandHandler).Methods("POST")
+	router.HandleFunc("/", commandHandler).Methods("GET")
 
 	port := Lib.Getenv("PORT")
 	if port == "" {
@@ -26,41 +30,24 @@ func main() {
 	}
 
 	log.Println("** Service Started on Port " + port + " **")
-	if err := http.ListenAndServe(":"+port, nil); err != nil {
+	if err := http.ListenAndServe(":"+port, router); err != nil {
 		log.Fatal(err)
 	}
 }
 
-
 func commandHandler(w http.ResponseWriter, r *http.Request) {
-	data := url.Values{}
-	data.Set("token", Lib.Getenv("SLACK_TOKEN"))
-	data.Add("channel", Lib.Getenv("SLACK_CHANNEL"))
-	data.Add("text", "yo")
+	Slack.NoIdea()
+}
 
-	log.Println("sending Message to Slack")
-	resp, err := http.Post("https://slack.com/api/chat.postMessage", "application/x-www-form-urlencoded", bytes.NewBufferString(data.Encode()))
-	if err != nil {
-		log.Fatal(err)
-	} else {
-		success := Success{resp.StatusCode}
-		jsonized, e := json.Marshal(success)
+func mergeRequestHandler(w http.ResponseWriter, r *http.Request) {
+	log.Printf("MR Handler")
 
-		if e != nil {
-			log.Fatal(e)
-		}
+	Git.GrabMRsForAllProjects()
 
-		w.Header().Add("Content-Type", "application/json")
-		io.WriteString(w, string(jsonized))
-	}
+	log.Printf("Done")
+	/*for _, mr := range mrs {
+		fmt.Print("%v\n", mr)
+	}*/
 
-
-	// testing stuff
-	api := slack.New(Lib.Getenv("SLACK_TOKEN"))
-	user, err := api.GetUserInfo("U043WHXCV")
-	if err != nil {
-		log.Println("%s\n", err)
-	} else {
-		log.Println("ID: %s, Fullname: %s, Email: %s\n", user.ID, user.Profile.RealName, user.Profile.Email)
-	}
+	//Slack.DisplayGitlabMRs("HEY")
 }
