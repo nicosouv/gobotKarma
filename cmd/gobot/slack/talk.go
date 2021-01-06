@@ -33,7 +33,7 @@ func sendMessageToSlack(text string) {
 
 	data := url.Values{}
 	data.Set("token", Lib.Getenv("SLACK_TOKEN"))
-	data.Add("channel", Lib.Getenv("SLACK_CHANNEL"))
+	data.Add("channel", Lib.Getenv("SLACK_CHANNEL_ID"))
 	data.Add("text", text)
 
 	log.Println("sending message to Slack")

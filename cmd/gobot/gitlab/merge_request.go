@@ -6,6 +6,8 @@ import (
 	"log"
 )
 
+const State_opened = "opened"
+
 func GrabProjects() []*gitlab.Project {
 	git := gitlab.NewClient(nil, Lib.Getenv("GITLAB_PRIVATE_TOKEN"))
 	git.SetBaseURL(Lib.Getenv("GITLAB_URL"))
@@ -69,6 +71,7 @@ func GrabMRsForUsername(username string) []*gitlab.MergeRequest {
 		pidMrs, _, _ = git.MergeRequests.ListMergeRequests(element.ID, &mrOpts)
 		copyPidMrs := pidMrs
 
+		log.Printf("Looking for " + username)
 		for _, mr := range copyPidMrs {
 			if username == mr.Author.Username {
 				log.Printf("Yes, save it")
