@@ -1,14 +1,12 @@
 package main
 
 import (
-	Git "app/cmd/gobot/gitlab"
 	Lib "app/cmd/gobot/lib"
-	IM "app/cmd/gobot/slack"
+	IM_Router "app/cmd/gobot/im"
+	VCS_Router "app/cmd/gobot/vcs"
 	"github.com/gorilla/mux"
-	"github.com/xanzy/go-gitlab"
 	"log"
 	"net/http"
-	"sort"
 	"strings"
 )
 
@@ -17,11 +15,13 @@ type Success struct {
 	Status int `json:"status"`
 }
 
+const event_route = "event"
+
 func main() {
 	router := mux.NewRouter()
-	router.HandleFunc("/merge-requests", mergeRequestHandler).Methods("POST")
-	router.HandleFunc("/merge-requests", commandHandler).Methods("GET")
-	router.HandleFunc("/", commandHandler).Methods("POST", "GET")
+
+	mount(router, "/im", IM_Router.InitializeRouter())
+	mount(router, "", VCS_Router.InitializeRouter())
 
 	port := Lib.Getenv("PORT")
 	if port == "" {
@@ -34,49 +34,12 @@ func main() {
 	}
 }
 
-func commandHandler(w http.ResponseWriter, r *http.Request) {
-	IM.NoIdea()
+func mount(r *mux.Router, path string, handler http.Handler) {
+	r.PathPrefix(path).Handler(
+		http.StripPrefix(
+			strings.TrimSuffix(path, "/"),
+			handler,
+		),
+	)
 }
 
-func mergeRequestHandler(w http.ResponseWriter, r *http.Request) {
-	_ = r.ParseForm()
-	user_opt_text := r.Form.Get("text")
-	opts := strings.Fields(user_opt_text)
-
-	var mrs []*gitlab.MergeRequest
-
-	if len(opts) == 0 {
-		opts = append(opts, "")
-	}
-
-	switch opts[0] {
-		case "wtf", "fuck", "test", "hello", "hey", "salut":
-			commandHandler(w, r)
-		case "user":
-			mrs = Git.GrabMRsForUsername(opts[1])
-		default:
-			mrs = Git.GrabMRsForAllProjects(Git.State_opened)
-	}
-
-	if len(mrs) > 0 {
-		messages := []IM.SlackMessage{}
-
-		sort.Slice(mrs, func(p, q int) bool {
-			return mrs[p].ProjectID < mrs[q].ProjectID })
-
-		for _, mr := range mrs {
-			msg := IM.SlackMessage{
-				Title:    mr.Title,
-				Wip:      mr.WorkInProgress,
-				Branch:   mr.SourceBranch,
-				Upvote:   mr.Upvotes,
-				Downvote: mr.Downvotes,
-				Author:   mr.Author.Name,
-			}
-
-			messages = append(messages, msg)
-		}
-
-		IM.DisplayGitlabMRs(messages)
-	}
-}
