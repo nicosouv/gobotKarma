@@ -2,4 +2,4 @@
 .idea
 
 # prod or dev configuration file. You need to file it.
-internal/.env
+internal/.env*
