@@ -34,6 +34,7 @@ func main() {
 	}
 }
 
+// mount mux router to be handle in their specific directory
 func mount(r *mux.Router, path string, handler http.Handler) {
 	r.PathPrefix(path).Handler(
 		http.StripPrefix(
